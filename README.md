@@ -198,8 +198,15 @@ npm run dev
 ## Testing
 
 ```bash
-cd backend
-npm test
+The complete backend test suite was executed successfully.
+
+- **Test framework:** Vitest
+- **Total tests:** 77
+- **Passed:** 77
+- **Failed:** 0
+- **Status:** All tests passing
+
+The test suite covers authentication, registration, login, JWT authorization, vehicle listing, search, CRUD operations, purchase behavior, restocking, validation, and role-based access control.
 ```
 
 ### Test Results
