@@ -1,207 +1,238 @@
-# AI Development Log
+# PROMPTS.md
 
-This file documents the prompts and responses exchanged with Amazon Q Developer (via `q chat` CLI) during development of this project.
+Raw prompts submitted to Amazon Q Developer (via `q chat` CLI) during development of this project.
 
 ---
 
-## Session 1
-
-### Prompt
+## Prompt 1 — Initial project / architecture
 
 You are my senior AI pair-programming assistant.
 
 I am completing a Car Dealership Inventory System as a first-round software engineering assessment for Incubyte.
 
-[Full prompt included the complete project specification covering: tech stack, backend requirements, user/vehicle models, authentication/authorization rules, business rules, HTTP status codes, architecture, TDD phases 1–12, test strategy, frontend requirements, git workflow, and final verification checklist.]
+[Complete project specification covering:
+- Tech stack
+- Backend requirements
+- User and Vehicle models
+- Authentication and authorization rules
+- Business rules
+- HTTP status codes
+- Architecture
+- TDD phases
+- Test strategy
+- Frontend requirements
+- Git workflow
+- Final verification checklist]
 
-### Response
+Before writing code, analyze the requirements and propose:
+1. Project architecture
+2. Database schema
+3. API endpoints
+4. Business rules and validations
+5. Authentication and authorization design
+6. Testing strategy
+7. TDD implementation order
+8. Git commit sequence
 
-Phase 1 — Project Foundation:
-- Created backend/frontend directory structure
-- Set up package.json, tsconfig.json, vitest.config.ts
-- Created Prisma schema with User and Vehicle models
-- Created server.ts (Express app, no listen) and index.ts (starts server)
-- Created stub routers for auth and vehicles
-- Installed all backend dependencies
-- Ran `prisma migrate dev --name init` successfully
-- Verified TypeScript compiles with no errors
-- Scaffolded frontend with Vite + React + TypeScript
-- Installed Tailwind CSS via @tailwindcss/vite
-- Verified frontend build passes
-- Created .gitignore, .env.example, README.md, PROMPTS.md
-- Committed: chore: initialize car dealership project
-
----
-
-_Sessions 2–7 below document the subsequent development phases._
-
----
-
-## Session 2
-
-### Purpose
-
-Implement user registration with TDD — write failing tests first, then implement the service.
-
-### Prompt summary
-
-> Follow TDD. Write failing unit tests for `registerUser` covering: creates a user with valid data, does not return passwordHash, stores password as bcrypt hash, throws on duplicate email, throws on invalid email, throws when password is shorter than 8 characters. Then implement the minimum service code to make them pass.
-
-### What Amazon Q implemented
-
-- `backend/src/modules/auth/auth.service.test.ts` — 6 unit tests for `registerUser` and 3 for `loginUser` (stub tests added here, implemented in Session 3)
-- `backend/src/modules/auth/auth.service.ts` — `registerUser` function: email/password validation, bcrypt hashing, Prisma user creation, duplicate-email error
-
-### Verification
-
-- All 6 `registerUser` tests pass
-
-### Commit
-
-`56e02ab` — `test: add user registration behavior`
+Follow RED → GREEN → REFACTOR strictly.
+Do not skip tests.
 
 ---
 
-## Session 3
+## Prompt 2 — Backend foundation
 
-### Purpose
+Implement Phase 1 of the Car Dealership Inventory System.
 
-Implement login behavior with TDD — extend tests and wire up the auth router.
+Set up the backend using Node.js, TypeScript, Express, Prisma and SQLite.
 
-### Prompt summary
+Create:
+- Prisma schema
+- User model
+- Vehicle model
+- Express server structure
+- Authentication and vehicle route stubs
+- TypeScript configuration
+- Vitest configuration
+- Environment configuration
 
-> Add failing tests for `loginUser`: returns a JWT token for valid credentials, throws 401 for wrong password, throws 401 for unknown email. Implement `loginUser` in the service and wire up `POST /api/auth/register` and `POST /api/auth/login` in the auth router.
+Keep the architecture simple:
+Router → Service → Prisma.
 
-### What Amazon Q implemented
-
-- `backend/src/modules/auth/auth.service.test.ts` — 3 additional `loginUser` unit tests
-- `backend/src/modules/auth/auth.service.ts` — `loginUser` function: credential lookup, bcrypt compare, JWT signing
-- `backend/src/modules/auth/auth.router.ts` — `POST /api/auth/register` and `POST /api/auth/login` route handlers with error-to-status mapping
-
-### Verification
-
-- All 9 auth service unit tests pass
-
-### Commit
-
-`67306cd` — `test: add login behavior`
-
----
-
-## Session 4
-
-### Purpose
-
-Implement JWT authentication and role-based authorization middleware with TDD, and scaffold the full vehicles module.
-
-### Prompt summary
-
-> Write integration tests for JWT middleware: allows access with valid token, returns 401 for missing/malformed/expired token. Write role tests: ADMIN can POST /api/vehicles (201), USER gets 403, unauthenticated gets 401. Implement `authenticate` middleware, `requireRole` middleware, the vehicles service (createVehicle, listVehicles, purchaseVehicle, restockVehicle, updateVehicle, deleteVehicle), and the vehicles router with all routes.
-
-### What Amazon Q implemented
-
-- `backend/src/middleware/auth.ts` — `authenticate` middleware: Bearer token extraction, `jwt.verify`, attaches `req.user`
-- `backend/src/middleware/requireRole.ts` — `requireRole(role)` middleware: checks `req.user.role`, returns 403 if insufficient
-- `backend/src/modules/vehicles/vehicles.service.ts` — full service with all six operations and business-rule validation
-- `backend/src/modules/vehicles/vehicles.router.ts` — all vehicle routes wired with `authenticate` and `requireRole('ADMIN')` where required
-- `backend/src/tests/auth.integration.test.ts` — 7 integration tests covering JWT middleware and role authorization
-
-### Verification
-
-- 7 auth integration tests pass
-- Backend TypeScript compiles without errors
-
-### Commit
-
-`4bf7402` — `test: add JWT authentication behavior`
+Do not over-engineer the project.
+Run the build/type checks and make sure everything passes.
+Commit this phase separately.
 
 ---
 
-## Session 5
+## Prompt 3 — TDD / authentication
 
-### Purpose
+Continue with the next TDD phase.
 
-Write the full vehicle behavior test suite (unit + integration) covering listing, search, CRUD, purchase, and restock.
+First write the failing tests for user registration and login.
+Follow RED → GREEN → REFACTOR.
 
-### Prompt summary
+Implement:
+- User registration
+- Password hashing with bcrypt
+- Duplicate email validation
+- Login
+- JWT generation
+- Authentication middleware
+- Appropriate HTTP status codes
 
-> Write unit tests for all vehicle service functions: createVehicle (valid data, empty make/model, invalid category, price ≤ 0, negative quantity), listVehicles (returns all, returns empty array), purchaseVehicle (decrements quantity, throws out of stock, throws not found), restockVehicle (increases quantity, throws non-positive amount, throws not found), updateVehicle (updates fields, throws not found), deleteVehicle (deletes, throws not found). Also write integration tests for all HTTP endpoints: GET /api/vehicles, GET /api/vehicles/search (make/model/category/minPrice/maxPrice filters), POST /api/vehicles, PUT /api/vehicles/:id, DELETE /api/vehicles/:id, POST /api/vehicles/:id/purchase, POST /api/vehicles/:id/restock.
-
-### What Amazon Q implemented
-
-- `backend/src/modules/vehicles/vehicles.service.test.ts` — 18 unit tests across all six service functions
-- `backend/src/tests/vehicles.integration.test.ts` — 43 integration tests covering all vehicle HTTP endpoints and filter combinations
-
-### Verification
-
-- All 77 backend tests pass (18 unit + 43 vehicle integration + 7 auth integration + 9 auth unit)
-
-### Commit
-
-`a1261cc` — `test: add vehicle listing, search, CRUD, purchase, restock behavior`
+Write and commit the tests before implementing the functionality.
+Run the complete test suite after implementation.
 
 ---
 
-## Session 6
+## Prompt 4 — Authorization
 
-### Purpose
+Implement JWT authentication and role-based authorization.
 
-Build the complete React frontend and finalize the full-stack application.
+Requirements:
+- USER and ADMIN roles
+- Protected routes require a valid JWT
+- Admin-only operations must reject normal users with 403
+- Invalid/missing tokens should return the appropriate status
+- Frontend role checks should only be for UX; authorization must be enforced server-side.
 
-### Prompt summary
-
-> Implement the React frontend. Create: AuthContext (JWT token + role stored in localStorage, setAuth/logout), api.ts (fetch wrappers for all backend endpoints), LoginPage, RegisterPage, Dashboard with vehicle cards, filtering/search bar, category filter, admin create/edit/delete/restock modals, stock badges on VehicleCard, purchase feedback, inventory summary statistics (total models, available, out of stock, inventory value), and toast notifications. Also create the vehicle seed script with 10 realistic vehicles covering all five categories.
-
-### What Amazon Q implemented
-
-- `frontend/src/AuthContext.tsx` — React context providing `token`, `role`, `setAuth`, `logout`; persists token to `localStorage`; decodes role from JWT payload
-- `frontend/src/api.ts` — typed fetch wrappers: `register`, `login`, `getVehicles`, `searchVehicles`, `createVehicle`, `updateVehicle`, `deleteVehicle`, `purchaseVehicle`, `restockVehicle`
-- `frontend/src/types.ts` — `Vehicle` interface
-- `frontend/src/components/LoginPage.tsx` — login form with error display, link to register
-- `frontend/src/components/RegisterPage.tsx` — registration form with validation error display, link to login
-- `frontend/src/components/VehicleCard.tsx` — vehicle card with stock badge (In Stock / Low Stock / Out of Stock), price, category, and Purchase button
-- `frontend/src/components/VehicleModal.tsx` — create/edit modal form for admin (make, model, category, price, quantity fields)
-- `frontend/src/components/Dashboard.tsx` — full dashboard: search bar, category filter buttons, inventory summary stats (SummaryCard components), vehicle grid, admin Add/Edit/Delete/Restock actions, toast notification system
-- `frontend/src/App.tsx` — routing between Login, Register, and Dashboard based on auth state
-- `frontend/src/main.tsx` — wraps app in `AuthProvider`
-- `backend/src/prisma/seed-vehicles.ts` — seeds 10 vehicles: Mercedes-Benz C-Class, Audi Q5, Tesla Model 3, Jeep Wrangler, Chevrolet Silverado, Hyundai i20, Porsche 911, Toyota Hilux, Kia Sportage, BMW 5 Series
-
-### Verification
-
-- Frontend build passes (`tsc -b && vite build` — 24 modules, no errors)
-- All 77 backend tests continue to pass
-- Seed script inserts 10 vehicles successfully
-
-### Commit
-
-`a494e02` — `feat: complete dealership inventory application`
+Add tests first and follow RED → GREEN → REFACTOR.
 
 ---
 
-## Final Verification
+## Prompt 5 — Vehicle APIs
 
-State of the project at final submission (`HEAD` = `a494e02`):
+Continue the TDD implementation for vehicle management.
 
-**Backend**
-- 77 tests passing across 4 test files (9 auth unit, 7 auth integration, 18 vehicle unit, 43 vehicle integration)
-- `npm run build` (TypeScript) compiles with no errors
-- All API endpoints implemented and tested: register, login, list vehicles, search vehicles, create/update/delete vehicle, purchase, restock
+Implement:
+- GET all vehicles
+- Vehicle search/filtering
+- POST vehicle
+- PUT vehicle
+- DELETE vehicle
+- Purchase vehicle
+- Restock vehicle
 
-**Frontend**
-- `npm run build` passes — 24 modules transformed, no TypeScript or Vite errors
-- Full SPA: Login, Register, Dashboard
-- Role-based UI: admin controls (add, edit, delete, restock) visible only to ADMIN role
-- Stock badges, purchase flow, toast notifications, inventory summary statistics all functional
+Business rules:
+- Price must be greater than 0
+- Quantity cannot be negative
+- Purchase cannot happen when quantity is 0
+- Purchase must decrement stock atomically
+- Restock must increase stock
+- Admin-only operations must be protected
 
-**Database**
-- Prisma migration applied (`prisma migrate dev --name init`)
-- Admin seed account: `admin@dealership.com` / `admin1234`
-- Vehicle seed: 10 vehicles across all five categories (SEDAN, SUV, TRUCK, HATCHBACK, COUPE)
+Add tests before implementation and verify the complete test suite.
 
-**Git history** (6 commits, chronological)
-1. `66fb1f2` — `chore: initialize car dealership project`
-2. `56e02ab` — `test: add user registration behavior`
-3. `67306cd` — `test: add login behavior`
-4. `4bf7402` — `test: add JWT authentication behavior`
-5. `a1261cc` — `test: add vehicle listing, search, CRUD, purchase, restock behavior`
-6. `a494e02` — `feat: complete dealership inventory application`
+---
+
+## Prompt 6 — Vehicle listing/search/CRUD tests
+
+Add tests covering vehicle listing, search, CRUD operations, purchase behavior and restock behavior.
+
+Make sure the tests cover:
+- Successful operations
+- Invalid input
+- Unauthorized access
+- Forbidden admin operations
+- Vehicle not found
+- Out-of-stock purchase
+- Correct quantity changes
+
+Keep following the RED → GREEN → REFACTOR workflow.
+
+---
+
+## Prompt 7 — Frontend
+
+Build the frontend for the Car Dealership Inventory System using React, TypeScript, Vite and Tailwind CSS.
+
+Create:
+- Login page
+- Registration page
+- Authentication context
+- Dashboard
+- Vehicle cards
+- Vehicle filtering/search
+- Purchase functionality
+- Admin dashboard
+- Add vehicle
+- Edit vehicle
+- Delete vehicle
+- Restock vehicle
+
+Connect the frontend to the existing Express API.
+
+Create a clean, modern dealership-style UI.
+Keep the application responsive and easy to use.
+
+---
+
+## Prompt 8 — Realistic vehicle seed data
+
+Create a vehicles-only seed script that appends new records without touching existing ones.
+
+Do not modify or delete existing vehicle records.
+
+Create backend/src/prisma/seed-vehicles.ts and use Prisma to insert realistic sample vehicles.
+
+Add 10 additional vehicles with realistic:
+- Makes
+- Models
+- Categories
+- Prices
+- Stock quantities
+
+Verify that the existing vehicles remain untouched and that all new records are inserted successfully.
+Run the build and verify everything passes.
+
+---
+
+## Prompt 9 — Vehicle card improvements
+
+Rewrite VehicleCard with stock badges (In Stock/Low Stock/Out of Stock), optimistic purchase update, and purchase success message.
+
+Requirements:
+- Show In Stock for normal quantities
+- Show Low Stock when quantity is 1–2
+- Show Out of Stock when quantity is 0
+- Purchasing should immediately update the displayed quantity
+- If the purchase API fails, revert the optimistic update
+- Show an inline "Purchase successful!" message
+- Automatically dismiss the success message after a few seconds
+- Keep the component synchronized with updated vehicle quantities
+- Update onPurchase to support async error handling
+
+---
+
+## Prompt 10 — Dashboard improvements
+
+Make the dashboard feel more like a real vehicle inventory management application.
+
+Add:
+- Total Models summary
+- Available vehicles summary
+- Out of Stock summary
+- Inventory Value
+- Result count
+- Reset Filters button
+- Better success/error feedback
+- Confirmation when deleting a vehicle
+- Toast notifications for add, edit, delete and restock
+- Accurate summary statistics even when filters are active
+
+Keep the existing backend unchanged if possible.
+Run all tests and builds after the changes.
+
+---
+
+## Prompt 11 — Fix empty dashboard/statistics bug
+
+The dashboard is showing 0 for Total Models, Available, Out of Stock and Inventory Value even though vehicles exist in the database.
+
+Investigate the frontend data loading and identify why the summary statistics are empty.
+
+Do not modify the database or remove existing vehicle data.
+Fix the issue using the existing API/data flow.
+Make sure filtered and unfiltered vehicle lists still work correctly.
+
+Run the complete test suite and frontend build after fixing it.
