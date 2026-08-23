@@ -1,8 +1,12 @@
 # Car Dealership Inventory System
 
+**Repository:** https://github.com/23wh1a0531/car-dealership-inventory
+
 ## Overview
 
 A full-stack Car Dealership Inventory System built as a software engineering assessment. It allows authenticated users to browse and purchase vehicles, while admins can manage the full inventory (create, update, delete, restock).
+
+![AutoVault User Dashboard](AutoVault-Screenshots/02.User-Dashboard.png)
 
 ## Features
 
@@ -161,8 +165,14 @@ Small, logical commits following the pattern:
 ## Setup
 
 ```bash
-git clone <repo-url>
-cd car-dealership-inventory
+cd backend
+cp ../.env.example .env
+# Edit .env with your JWT_SECRET
+npm install
+npx prisma migrate dev
+npx ts-node src/prisma/seed.ts
+npx ts-node src/prisma/seed-vehicles.ts
+npm run dev
 ```
 
 ## Backend
@@ -190,6 +200,18 @@ npm run dev
 ```bash
 cd backend
 npm test
+```md
+### Test Results
+
+The complete backend test suite was executed successfully.
+
+- **Test framework:** Vitest
+- **Total tests:** 77
+- **Passed:** 77
+- **Failed:** 0
+- **Status:** All tests passing
+
+The test suite covers authentication, registration, login, JWT authorization, vehicle listing, search, CRUD operations, purchase behavior, restocking, validation, and role-based access control.
 ```
 
 ## Coverage
@@ -203,7 +225,27 @@ Coverage results will appear in `backend/coverage/`.
 
 ## Screenshots
 
-_Screenshots to be added after UI completion._
+### User Login
+![User Login](AutoVault-Screenshots/01.User-Login.png)
+
+### User Dashboard
+![User Dashboard](AutoVault-Screenshots/02.User-Dashboard.png)
+
+### User Purchase
+![User Purchase](AutoVault-Screenshots/03.User-Purchase.png)
+
+### Admin Login
+![Admin Login](AutoVault-Screenshots/04.Admin-Login.png)
+
+### Admin Dashboard
+![Admin Dashboard](AutoVault-Screenshots/05.Admin-Dashboard.png)
+
+### Add Vehicle
+![Add Vehicle](AutoVault-Screenshots/06.Admin-AddVehicle.png)
+
+### Update Vehicle
+![Update Vehicle](AutoVault-Screenshots/07.Admin-UpdateDetails.png)
+
 
 ## My AI Usage
 
