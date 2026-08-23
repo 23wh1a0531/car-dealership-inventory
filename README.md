@@ -200,7 +200,8 @@ npm run dev
 ```bash
 cd backend
 npm test
-```md
+```
+
 ### Test Results
 
 The complete backend test suite was executed successfully.
