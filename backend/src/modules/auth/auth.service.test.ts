@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import bcrypt from 'bcrypt';
 import prisma from '../../prisma/client';
-import { registerUser } from './auth.service';
+import { registerUser, loginUser } from './auth.service';
 
 beforeEach(async () => {
   await prisma.user.deleteMany();
@@ -38,5 +38,26 @@ describe('registerUser', () => {
 
   it('throws when password is shorter than 8 characters', async () => {
     await expect(registerUser('test@example.com', 'short')).rejects.toThrow('Password must be at least 8 characters');
+  });
+});
+
+describe('loginUser', () => {
+  beforeEach(async () => {
+    await prisma.user.deleteMany();
+    await registerUser('login@example.com', 'password123');
+  });
+
+  it('returns a JWT token for valid credentials', async () => {
+    const result = await loginUser('login@example.com', 'password123');
+    expect(result.token).toBeDefined();
+    expect(typeof result.token).toBe('string');
+  });
+
+  it('throws 401 for wrong password', async () => {
+    await expect(loginUser('login@example.com', 'wrongpass')).rejects.toThrow('Invalid credentials');
+  });
+
+  it('throws 401 for unknown email', async () => {
+    await expect(loginUser('nobody@example.com', 'password123')).rejects.toThrow('Invalid credentials');
   });
 });
