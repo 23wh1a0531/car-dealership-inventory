@@ -220,9 +220,9 @@ The complete backend test suite was executed successfully.
 - **Status:** All tests passing
 
 The test suite covers authentication, registration, login, JWT authorization, vehicle listing, search, CRUD operations, purchase behavior, restocking, validation, and role-based access control.
-```
 
-## Coverage
+
+### Coverage
 
 ```bash
 cd backend
