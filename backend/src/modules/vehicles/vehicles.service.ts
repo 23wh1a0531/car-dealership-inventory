@@ -44,8 +44,13 @@ export async function searchVehicles(filters: {
       ...(filters.make && { make: { contains: filters.make } }),
       ...(filters.model && { model: { contains: filters.model } }),
       ...(filters.category && { category: filters.category }),
-      ...(filters.minPrice !== undefined && { price: { gte: filters.minPrice } }),
-      ...(filters.maxPrice !== undefined && { price: { lte: filters.maxPrice } }),
+
+      ...((filters.minPrice !== undefined || filters.maxPrice !== undefined) && {
+        price: {
+          ...(filters.minPrice !== undefined && { gte: filters.minPrice }),
+          ...(filters.maxPrice !== undefined && { lte: filters.maxPrice }),
+        },
+      }),
     },
     orderBy: { createdAt: 'desc' },
   });
